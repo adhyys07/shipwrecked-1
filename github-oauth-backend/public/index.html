@@ -49,7 +49,7 @@
       margin-top: 10px;
       display: block;
     }
-    input, select, button {
+    input, select, button, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -80,10 +80,8 @@
 </head>
 <body>
 
-  <!-- GitHub Login Button -->
   <button class="top-right-button" onclick="loginWithGitHub()">GitHub</button>
 
-  <!-- Main Panel -->
   <div class="centered-container">
     <div class="panel">
       <h1>Time Logger</h1>
@@ -93,7 +91,6 @@
         <option disabled selected>Login first...</option>
       </select>
 
-    
       <div>
         <p id="timerDisplay">00:00:00</p>
         <button onclick="startTimer()">Start Logging</button>
@@ -101,7 +98,7 @@
       </div>
 
       <div class="uploads">
-        <label for="photoUpload">Upload Progress Photos (At least 2 images your progress):</label>
+        <label for="photoUpload">Upload Progress Photos (At least 2 images):</label>
         <input type="file" id="photoUpload" accept="image/*" multiple />
 
         <label for="videoUpload">Upload Progress Video:</label>
@@ -110,7 +107,7 @@
 
       <div class="description">
         <label for="description">Description:</label>
-        <textarea style="width: 500px;" id="description" rows="6" placeholder="Describe your progress..."></textarea> 
+        <textarea id="description" rows="6" placeholder="Describe your progress..."></textarea> 
       </div>
 
       <button onclick="submitLog()">Submit Log</button>
@@ -118,13 +115,12 @@
   </div>
 
   <script>
-    const CLIENT_ID = 'Ov23lizw0cZPEhNdeb3I'; // Replace with your GitHub OAuth client ID
+    const CLIENT_ID = 'Ov23lizw0cZPEhNdeb3I';
     const REDIRECT_URI = 'http://localhost:3000/callback';
     let startTime, timerInterval;
 
     function loginWithGitHub() {
-      const scope = 'repo';
-      const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${scope}`;
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=repo`;
       window.location.href = authUrl;
     }
 
@@ -140,24 +136,59 @@
     }
 
     function pauseTimer() {
-      pauseTimer = () => {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      };
+      clearInterval(timerInterval);
+      timerInterval = null;
     }
 
-    function submitLog() {
+    async function submitLog() {
       const repo = document.getElementById("repoSelect").value;
       const photos = document.getElementById("photoUpload").files;
       const video = document.getElementById("videoUpload").files[0];
       const timeSpent = document.getElementById("timerDisplay").innerText;
+      const description = document.getElementById("description").value;
 
-      alert(`Repo: ${repo}\nTime Spent: ${timeSpent}\nPhotos: ${photos.length}\nVideo: ${video ? video.name : 'None'}`);
+      if (!repo || photos.length < 2 || !description) {
+        alert("⚠️ Please select a repo, upload at least 2 photos, and provide a description.");
+        return;
+      }
 
-      
+      const formData = new FormData();
+      formData.append("repo", repo);
+      formData.append("timeSpent", timeSpent);
+      formData.append("description", description);
+
+      for (let i = 0; i < photos.length; i++) {
+        formData.append("photos", photos[i]);
+      }
+
+      if (video) {
+        formData.append("video", video);
+      }
+
+      try {
+        const response = await fetch('/api/log', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ Log submitted successfully!");
+          // Reset form
+          document.getElementById("photoUpload").value = "";
+          document.getElementById("videoUpload").value = "";
+          document.getElementById("description").value = "";
+          document.getElementById("timerDisplay").innerText = "00:00:00";
+        } else {
+          alert(`❌ Error: ${result.error}`);
+        }
+      } catch (err) {
+        console.error("❌ Submission failed:", err);
+        alert("❌ Failed to submit log. See console for details.");
+      }
     }
 
-    // On page load, try fetching repos
     window.onload = async () => {
       const repoSelect = document.getElementById('repoSelect');
 
