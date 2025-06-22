@@ -117,7 +117,11 @@
   <script>
     const CLIENT_ID = 'Ov23lizw0cZPEhNdeb3I';
     const REDIRECT_URI = 'http://localhost:3000/callback';
-    let startTime, timerInterval;
+
+    let isLogging = false;
+    let startTime = null;
+    let timerInterval = null;
+    let elapsedTime = 0; // Total time already logged in ms
 
     function loginWithGitHub() {
       const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=repo`;
@@ -125,12 +129,20 @@
     }
 
     function startTimer() {
-      startTime = Date.now();
+      if (!isLogging) {
+        document.getElementById("repoSelect").disabled = true;
+        isLogging = true;
+      }
+
+      startTime = Date.now() - elapsedTime; // Resume from last elapsed time
       timerInterval = setInterval(() => {
-        const diff = Date.now() - startTime;
-        const hrs = Math.floor(diff / 3600000).toString().padStart(2, '0');
-        const mins = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-        const secs = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        const currentTime = Date.now();
+        elapsedTime = currentTime - startTime;
+
+        const hrs = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
+        const mins = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+        const secs = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+
         document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
       }, 1000);
     }
@@ -146,11 +158,6 @@
       const video = document.getElementById("videoUpload").files[0];
       const timeSpent = document.getElementById("timerDisplay").innerText;
       const description = document.getElementById("description").value;
-
-      if (!repo || photos.length < 2 || !description) {
-        alert("⚠️ Please select a repo, upload at least 2 photos, and provide a description.");
-        return;
-      }
 
       const formData = new FormData();
       formData.append("repo", repo);
@@ -175,13 +182,19 @@
 
         if (response.ok) {
           alert("✅ Log submitted successfully!");
-          // Reset form
+          // Reset everything
           document.getElementById("photoUpload").value = "";
           document.getElementById("videoUpload").value = "";
           document.getElementById("description").value = "";
           document.getElementById("timerDisplay").innerText = "00:00:00";
+
+          document.getElementById("repoSelect").disabled = false;
+          clearInterval(timerInterval);
+          timerInterval = null;
+          elapsedTime = 0;
+          isLogging = false;
         } else {
-          alert(`❌ Error: ${result.error}`);
+          alert(`Error: ${result.error}`);
         }
       } catch (err) {
         console.error("❌ Submission failed:", err);
@@ -203,7 +216,7 @@
           return;
         }
 
-        repoSelect.innerHTML = ''; // Clear old options
+        repoSelect.innerHTML = '';
 
         repos.forEach(repo => {
           const opt = document.createElement('option');
@@ -216,5 +229,6 @@
       }
     };
   </script>
+
 </body>
 </html>

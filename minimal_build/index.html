@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Time Logger</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background-image: url('./images/bg.png');
+      color: black;
+      margin: 0;
+      padding: 0;
+    }
+
+    .centered-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding-top: 50px;
+    }
+
+    .panel {
+      background: white;
+      padding: 30px;
+      border: 5px solid black;
+      border-radius: 0;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: black;
+    }
+
+    label {
+      font-size: 10px;
+      display: block;
+      margin-bottom: 5px;
+      margin-top: 10px;
+    }
+
+    input, select, textarea {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #000;
+      color: white;
+      border: 3px solid white;
+      box-sizing: border-box;
+    }
+
+    button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      background-color: #00FFCC;
+      color: #000;
+      border: 3px solid #000;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: grey;
+    }
+
+    #timerDisplay {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    ::placeholder {
+      color: white;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button-row button {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="centered-container">
+    <div class="panel">
+      <h1>GIANT WHEEL</h1>
+
+      <div>
+        <p id="timerDisplay">00:00:00</p>
+      </div>
+
+      <div class="button-row">
+        <button id="startPauseBtn" onclick="toggleTimer()">START LOGGING</button>
+        <button id="cancelBtn" onclick="cancelTimer()" style="display: none;">CANCEL</button>
+      </div>
+
+      <div id="logFields" style="display: none;">
+        <div class="uploads">
+          <label for="photoUpload">UPLOAD PHOTOS:</label>
+          <input type="file" id="photoUpload" accept="image/*"/>
+
+          <label for="videoUpload">UPLOAD VIDEO:</label>
+          <input type="file" id="videoUpload" accept="video/*"/>
+        </div>
+
+        <div class="description">
+          <label for="description">PROGRESS DESCRIPTION:</label>
+          <textarea id="description" rows="6" placeholder="DESCRIBE YOUR PROGRESS..."></textarea>
+        </div>
+
+        <button onclick="submitLog()">SUBMIT LOG</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval = null;
+    let isRunning = false;
+    const audio = new Audio('./audio/click.mp3');
+
+
+    function toggleTimer() {
+      const startPauseBtn = document.getElementById("startPauseBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const logFields = document.getElementById("logFields");
+      audio.play();
+
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimer, 1000);
+        isRunning = true;
+        startPauseBtn.innerText = "PAUSE LOGGING";
+        cancelBtn.style.display = "block";
+        logFields.style.display = "block"; // show fields on first start
+      } else {
+        clearInterval(timerInterval);
+        elapsedTime = Date.now() - startTime;
+        isRunning = false;
+        startPauseBtn.innerText = "START LOGGING";
+      }
+    }
+
+    function updateTimer() {
+      const currentTime = Date.now();
+      elapsedTime = currentTime - startTime;
+
+      const hrs = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
+      const mins = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+      const secs = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+
+      document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
+    }
+
+    function cancelTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      isRunning = false;
+      startTime = 0;
+      elapsedTime = 0;
+
+      document.getElementById("timerDisplay").innerText = "00:00:00";
+      document.getElementById("startPauseBtn").innerText = "START LOGGING";
+      document.getElementById("cancelBtn").style.display = "none";
+      document.getElementById("logFields").style.display = "none";
+      audio.play();
+    }
+
+    async function submitLog() {
+      audio.play();
+      const photos = document.getElementById("photoUpload").files;
+      const video = document.getElementById("videoUpload").files[0];
+      const timeSpent = document.getElementById("timerDisplay").innerText;
+      const description = document.getElementById("description").value;
+
+      const formData = new FormData();
+      formData.append("timeSpent", timeSpent);
+      formData.append("description", description);
+
+      for (let i = 0; i < photos.length; i++) {
+        formData.append("photos", photos[i]);
+      }
+
+      if (video) {
+        formData.append("video", video);
+      }
+
+      try {
+        const response = await fetch('/api/log', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ LOG SUBMITTED!");
+          document.getElementById("photoUpload").value = "";
+          document.getElementById("videoUpload").value = "";
+          document.getElementById("description").value = "";
+          cancelTimer();
+        } else {
+          alert(`❌ ERROR: ${result.error}`);
+        }
+      } catch (err) {
+        console.error("❌ Submission failed:", err);
+        alert("❌ Failed to submit log. See console.");
+      }
+    }
+  </script>
+</body>
+</html>
