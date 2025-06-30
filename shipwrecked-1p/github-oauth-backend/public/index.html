@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Time Logger</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+    }
+    .top-right-button {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8em;
+      z-index: 1000;
+    }
+    .top-right-button:hover {
+      background-color: #0056b3;
+    }
+    .centered-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding-top: 50px;
+    }
+    .panel {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, select, button, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button:not(.top-right-button) {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:not(.top-right-button):hover {
+      background-color: #45a049;
+    }
+    #timerDisplay {
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .uploads {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="top-right-button" onclick="loginWithGitHub()">GitHub</button>
+
+  <div class="centered-container">
+    <div class="panel">
+      <h1>Time Logger</h1>
+
+      <label for="repoSelect">Your Repositories:</label>
+      <select id="repoSelect">
+        <option disabled selected>Login first...</option>
+      </select>
+
+      <div>
+        <p id="timerDisplay">00:00:00</p>
+        <p id="totalhrs">Total Hours on this Repo: {null} </p>
+        <button onclick="startTimer()">Start Logging</button>
+        <button onclick="pauseTimer()">Pause Logging</button>
+      </div>
+
+      <div class="uploads">
+        <label for="photoUpload">Upload Progress Photos</label>
+        <input type="file" id="photoUpload" accept="image/*" multiple />
+
+        <label for="videoUpload">Upload Progress Video:</label>
+        <input type="file" id="videoUpload" accept="video/*" />
+      </div>
+
+      <div class="description">
+        <label for="description">Description:</label>
+        <textarea id="description" rows="6" placeholder="Describe your progress..."></textarea> 
+      </div>
+
+      <button onclick="submitLog()">Submit Log</button>
+    </div>
+  </div>
+
+  <script>
+    const CLIENT_ID = 'Ov23lizw0cZPEhNdeb3I';
+    const REDIRECT_URI = 'http://localhost:3000/callback';
+
+    let isLogging = false;
+    let startTime = null;
+    let timerInterval = null;
+    let elapsedTime = 0; // Total time already logged in ms
+
+    function loginWithGitHub() {
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=repo`;
+      window.location.href = authUrl;
+    }
+
+    function startTimer() {
+      if (!isLogging) {
+        document.getElementById("repoSelect").disabled = true;
+        isLogging = true;
+      }
+
+      startTime = Date.now() - elapsedTime; // Resume from last elapsed time
+      timerInterval = setInterval(() => {
+        const currentTime = Date.now();
+        elapsedTime = currentTime - startTime;
+
+        const hrs = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
+        const mins = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+        const secs = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+
+        document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    async function submitLog() {
+      const repo = document.getElementById("repoSelect").value;
+      const photos = document.getElementById("photoUpload").files;
+      const video = document.getElementById("videoUpload").files[0];
+      const timeSpent = document.getElementById("timerDisplay").innerText;
+      const description = document.getElementById("description").value;
+
+      const formData = new FormData();
+      formData.append("repo", repo);
+      formData.append("timeSpent", timeSpent);
+      formData.append("description", description);
+
+      for (let i = 0; i < photos.length; i++) {
+        formData.append("photos", photos[i]);
+      }
+
+      if (video) {
+        formData.append("video", video);
+      }
+
+      try {
+        const response = await fetch('/api/log', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ Log submitted successfully!");
+          // Reset everything
+          document.getElementById("photoUpload").value = "";
+          document.getElementById("videoUpload").value = "";
+          document.getElementById("description").value = "";
+          document.getElementById("timerDisplay").innerText = "00:00:00";
+
+          document.getElementById("repoSelect").disabled = false;
+          clearInterval(timerInterval);
+          timerInterval = null;
+          elapsedTime = 0;
+          isLogging = false;
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (err) {
+        console.error("❌ Submission failed:", err);
+        alert("❌ Failed to submit log. See console for details.");
+      }
+    }
+
+    window.onload = async () => {
+      const repoSelect = document.getElementById('repoSelect');
+
+      try {
+        const response = await fetch('/api/repos');
+        if (!response.ok) throw new Error('Not authenticated');
+
+        const repos = await response.json();
+
+        if (repos.length === 0) {
+          repoSelect.innerHTML = '<option disabled selected>No repositories found</option>';
+          return;
+        }
+
+        repoSelect.innerHTML = '';
+
+        repos.forEach(repo => {
+          const opt = document.createElement('option');
+          opt.value = repo.full_name;
+          opt.text = repo.full_name;
+          repoSelect.appendChild(opt);
+        });
+      } catch (err) {
+        repoSelect.innerHTML = '<option disabled selected>Login first...</option>';
+      }
+    };
+  </script>
+
+</body>
+</html>
