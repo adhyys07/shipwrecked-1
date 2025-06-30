@@ -1,0 +1,2 @@
+1) Auth Page -> Atfer Submission -> Airtable Database Registeration -> Airtable Automation will generate Unique API key for each user.-> Emailed Api key !
+2) Time Logger Page -> First time it will ask for Api key -> page will run a query to chk the person api key is valid or not -> If exists it will able to log time if not it will throw an error 

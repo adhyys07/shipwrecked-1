@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Time Logger</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background-image: url('./images/bg.png');
+      color: black;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .centered-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      padding: 0;
+    }
+
+    .panel {
+      background: white;
+      padding: 30px;
+      border: 5px solid black;
+      border-radius: 0;
+      width: 90vw;
+      max-width: 1400px;
+      min-width: 900px;
+      height: 75vh;
+      max-height: 700px;
+      min-height: 450px;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      box-sizing: border-box;
+      gap: 32px;
+    }
+
+    .left-section, .right-section {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .left-section {
+      justify-content: center;
+      align-items: center;
+      border-right: 3px solid #000;
+      padding-right: 24px;
+    }
+
+    .right-section {
+      justify-content: flex-end;
+      align-items: stretch;
+      padding-left: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: black;
+      width: 100%;
+    }
+
+    label {
+      font-size: 10px;
+      display: block;
+      margin-bottom: 5px;
+      margin-top: 10px;
+    }
+
+    input, select, textarea {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #000;
+      color: white;
+      border: 3px solid white;
+      box-sizing: border-box;
+      resize: none;
+    }
+
+    button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      background-color: #00FFCC;
+      color: #000;
+      border: 3px solid #000;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: grey;
+    }
+
+    #timerDisplay {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    #totalhrs {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    ::placeholder {
+      color: white;
+    }
+
+    .button-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      margin-top: auto;
+    }
+
+    .button-row button {
+      flex: unset;
+      width: 220px;
+      margin: 0 auto;
+    }
+
+    /* Giant Wheel Animation Styles */
+.wheel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 400px; /* or your preferred height */
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel {
+  width: 400px;
+  height: 400px;
+  object-fit: contain;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  /* Cyan glow effect */
+  filter: drop-shadow(0 0 2px #00fff7) drop-shadow(0 0 4px #00fff7);
+}
+
+    .wheel.paused {
+      animation-play-state: paused;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 900px) {
+      .panel {
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        width: 98vw;
+        height: auto;
+        max-width: 98vw;
+        max-height: none;
+        gap: 0;
+      }
+      .left-section, .right-section {
+        border: none;
+        padding: 0;
+      }
+      .left-section {
+        border-bottom: 3px solid #000;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+      }
+      .right-section {
+        padding-top: 0;
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="centered-container">
+    <div class="panel">
+      <div class="left-section">
+        <u><h1>GIANT WHEEL</h1></u>
+<div class="wheel-container">
+  <img id="giantWheel" src="images/giantwhee2l.gif" alt="Giant Wheel" class="wheel" style="display:none;" />
+  <img id="giantWheelStatic" src="images/giantwhee2l.png" alt="Giant Wheel Static" class="wheel" style="display:block;" />
+</div>
+        <div>
+          <p id="timerDisplay">00:00:00</p>
+          <p id="totalhrs">Total Time Enjoyed ! :</p>
+        </div>
+      </div>
+      <div class="right-section">
+        <div class="button-row">
+          <button id="startPauseBtn" onclick="toggleTimer()">START LOGGING</button>
+        </div>
+        <div id="logFields" style="display: none;">
+          <div class="uploads">
+            <label for="photoUpload">UPLOAD PHOTOS:</label>
+            <textarea id="photoCDN" rows="2" placeholder="Enter Photos CDN"></textarea>
+            <label for="videoUpload">UPLOAD VIDEO:</label>
+            <textarea id="videoCDN" rows="2" placeholder="Enter Video CDN"></textarea>
+          </div>
+          <div class="description">
+            <label for="description">PROGRESS DESCRIPTION:</label>
+            <textarea id="description" rows="6" placeholder="DESCRIBE YOUR PROGRESS..."></textarea>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+            <button id="cancelBtn" onclick="cancelTimer()" style="display: none;">CANCEL</button>
+            <button id="pauseBtn" onclick="pauseTimer()" style="display: none;">PAUSE</button>
+          </div>
+          <button onclick="submitLog()">SUBMIT LOG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval = null;
+    let isRunning = false;
+    const audio = new Audio('./audio/click.mp3');
+
+    function setWheelPaused(paused) {
+      document.getElementById("giantWheel").style.display = paused ? "none" : "block";
+      document.getElementById("giantWheelStatic").style.display = paused ? "block" : "none";
+    }
+
+    // Show static image on load
+    setWheelPaused(true);
+
+    function toggleTimer() {
+      const startPauseBtn = document.getElementById("startPauseBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const logFields = document.getElementById("logFields");
+      audio.play();
+
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimer, 1000);
+        isRunning = true;
+        startPauseBtn.innerText = "PAUSE LOGGING";
+        cancelBtn.style.display = "block";
+        pauseBtn.style.display = "block";
+        logFields.style.display = "block";
+        setWheelPaused(false); // Show GIF, hide static
+      } else {
+        clearInterval(timerInterval);
+        elapsedTime = Date.now() - startTime;
+        isRunning = false;
+        startPauseBtn.innerText = "START LOGGING";
+        setWheelPaused(true); // Show static, hide GIF
+        pauseBtn.style.display = "none";
+      }
+    }
+
+    function updateTimer() {
+      const currentTime = Date.now();
+      elapsedTime = currentTime - startTime;
+
+      const hrs = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
+      const mins = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
+      const secs = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+
+      document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
+    }
+
+    function cancelTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      isRunning = false;
+      startTime = 0;
+      elapsedTime = 0;
+
+      document.getElementById("timerDisplay").innerText = "00:00:00";
+      document.getElementById("startPauseBtn").innerText = "START LOGGING";
+      document.getElementById("cancelBtn").style.display = "none";
+      document.getElementById("pauseBtn").style.display = "none";
+      document.getElementById("logFields").style.display = "none";
+      setWheelPaused(true); // Show static, hide GIF
+      audio.play();
+    }
+
+    function pauseTimer() {
+      if (isRunning) {
+        clearInterval(timerInterval);
+        elapsedTime = Date.now() - startTime;
+        isRunning = false;
+        document.getElementById("startPauseBtn").innerText = "RESUME LOGGING";
+        setWheelPaused(true); // Show static, hide GIF
+      }
+    }
+
+    async function submitLog() {
+      audio.play();
+      const photosCDN = document.getElementById("photoCDN").value;
+      const videoCDN = document.getElementById("videoCDN").value;
+      const timeSpent = document.getElementById("timerDisplay").innerText;
+      const description = document.getElementById("description").value;
+
+      const data = {
+        timeSpent,
+        description,
+        photosCDN,
+        videoCDN
+      };
+
+      try {
+        const response = await fetch('/api/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("✅ LOG SUBMITTED!");
+          document.getElementById("photoCDN").value = "";
+          document.getElementById("videoCDN").value = "";
+          document.getElementById("description").value = "";
+          cancelTimer();
+        } else {
+          alert(`❌ ERROR: ${result.error}`);
+        }
+      } catch (err) {
+        console.error("❌ Submission failed:", err);
+        alert("❌ Failed to submit log. See console.");
+      }
+    }
+  </script>
