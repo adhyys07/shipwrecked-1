@@ -50,6 +50,48 @@
       box-sizing: border-box;
       gap: 32px;
     }
+    
+/* Add this after your .panel styles */
+.fairy-lights {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+
+.fairy-light {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 40%, #fff 60%, #fffa 80%, transparent 100%);
+  box-shadow:
+    0 0 16px 4px #fff7,
+    0 0 32px 8px var(--fairy-color, #ff0);
+  animation: fairy-blink 2s infinite alternate;
+  border: 2px solid #fff4;
+}
+
+.fairy-light:nth-child(1)  { --fairy-color: #ffb347; animation-delay: 0s; }
+.fairy-light:nth-child(2)  { --fairy-color: #ff6961; animation-delay: 0.2s; }
+.fairy-light:nth-child(3)  { --fairy-color: #77dd77; animation-delay: 0.4s; }
+.fairy-light:nth-child(4)  { --fairy-color: #84b6f4; animation-delay: 0.6s; }
+.fairy-light:nth-child(5)  { --fairy-color: #f49ac2; animation-delay: 0.8s; }
+.fairy-light:nth-child(6)  { --fairy-color: #fff68f; animation-delay: 1s; }
+.fairy-light:nth-child(7)  { --fairy-color: #b19cd9; animation-delay: 1.2s; }
+.fairy-light:nth-child(8)  { --fairy-color: #ffb347; animation-delay: 1.4s; }
+.fairy-light:nth-child(9)  { --fairy-color: #ff6961; animation-delay: 1.6s; }
+.fairy-light:nth-child(10) { --fairy-color: #77dd77; animation-delay: 1.8s; }
+
+@keyframes fairy-blink {
+  0%   { filter: brightness(1.2) drop-shadow(0 0 8px var(--fairy-color, #fff)); }
+  100% { filter: brightness(2.2) drop-shadow(0 0 24px var(--fairy-color, #fff)); }
+}
 
     .left-section, .right-section {
       flex: 1 1 0;
@@ -215,7 +257,20 @@
 <body>
 
   <div class="centered-container">
+    <div class="fairy-lights">
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+  <div class="fairy-light"></div>
+</div>
     <div class="panel">
+      
       <div class="left-section">
         <u><h1>GIANT WHEEL</h1></u>
 <div class="wheel-container">
