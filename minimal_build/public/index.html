@@ -24,13 +24,60 @@
       box-sizing: border-box;
     }
 
+    .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100vh;
+  background: #181c20;
+  color: #fff;
+  border-right: 3px solid #00fff7;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px 16px 16px 16px;
+  box-sizing: border-box;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.sidebar h2 {
+  font-size: 14px;
+  margin-bottom: 24px;
+  color: #00fff7;
+  letter-spacing: 1px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.sidebar li {
+  margin-bottom: 18px;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar li:hover {
+  background: #00fff7;
+  color: #181c20;
+}
+
     .centered-container {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start; /* Shift content to the left */
       align-items: center;
       height: 100vh;
       width: 100vw;
       padding: 0;
+      margin-left: 220px; /* Push main content to the right of sidebar */
     }
 
     .panel {
@@ -38,17 +85,18 @@
       padding: 30px;
       border: 5px solid black;
       border-radius: 0;
-      width: 90vw;
-      max-width: 1400px;
-      min-width: 900px;
-      height: 75vh;
-      max-height: 700px;
-      min-height: 450px;
+      width: 78vw;           /* Increased from 65vw */
+      max-width: 1600px;     /* Increased from 900px */
+      min-width: 1250px;      /* Increased from 600px */
+      height: 70vh;          /* Increased from 60vh */
+      max-height: 600px;     /* Increased from 500px */
+      min-height: 600px;     /* Increased from 350px */
       display: flex;
       flex-direction: row;
       align-items: stretch;
       box-sizing: border-box;
       gap: 32px;
+      margin-left: 30px;    /* Smaller gap from sidebar */
     }
     
 /* Add this after your .panel styles */
@@ -164,7 +212,7 @@
 
     #timerDisplay {
       text-align: center;
-      font-size: 18px;
+      font-size: 14px;
       font-weight: bold;
       margin: 10px 0;
     }
@@ -208,8 +256,8 @@
 }
 
 .wheel {
-  width: 400px;
-  height: 400px;
+  width: 420px;
+  height: 420px;
   object-fit: contain;
   position: absolute;
   left: 50%;
@@ -252,10 +300,102 @@
         margin-top: 0;
       }
     }
+
+    /* Add Project Dialog Styles */
+#addProjectDialog {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+}
+
+#addProjectForm {
+  background: #181c20;
+  border: 3px solid #00fff7;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px #000a;
+  padding: 48px 48px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 400px;
+  max-width: 96vw;
+}
+
+#addProjectForm h3 {
+  color: #00fff7;
+  margin-bottom: 24px;
+  font-size: 20px;
+}
+
+#newProjectName {
+  width: 100%;
+  font-size: 18px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  border: 2px solid #00fff7;
+  background: #222;
+  color: #fff;
+  outline: none;
+}
+
+#newProjectLevel,
+#newProjectType,
+#newProjectOwner {
+  width: 100%;
+  font-size: 18px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  border: 2px solid #00fff7;
+  background: #222;
+  color: #fff;
+  outline: none;
+}
+
+#addProjectForm button {
+  background: #00fff7;
+  color: #181c20;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 32px;
+  font-size: 18px;
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+}
+
+#addProjectForm button[type="button"] {
+  background: #333;
+  color: #fff;
+}
   </style>
 </head>
 <body>
-
+  <div class="sidebar">
+    <h2>Your Projects</h2>
+    <ul id="projectList">
+      <li>Project Alpha</li>
+      <li>Project Beta</li>
+      <li>Project Gamma</li>
+      <li>Project Delta</li>
+      <!-- Add more projects as needed -->
+    </ul>
+    <div id="projectMenu" style="display:none; position:fixed; z-index:9999; background:#222; color:#fff; border:2px solid #00fff7; border-radius:8px; min-width:140px; box-shadow:0 4px 16px #000a; font-family:'Press Start 2P',monospace; font-size:12px;">
+      <div class="menu-item" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid #00fff7;">Open</div>
+      <div class="menu-item" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid #00fff7;">Rename</div>
+      <div class="menu-item" style="padding:10px 16px; cursor:pointer;">Delete</div>
+    </div>
+    <button id="addProjectBtn" title="Add Project"style="margin-top:auto; width:40px; height:40px; align-self:center; background:#00fff7; color:#181c20; border:none; border-radius:50%; font-size:28px; font-family:'Press Start 2P',monospace; cursor:pointer; box-shadow:0 2px 8px #00fff799; display:flex; align-items:center; justify-content:center;">
+      +
+    </button>
+  </div>
   <div class="centered-container">
     <div class="fairy-lights">
   <div class="fairy-light"></div>
@@ -278,8 +418,11 @@
   <img id="giantWheelStatic" src="images/giantwhee2l.png" alt="Giant Wheel Static" class="wheel" style="display:block;" />
 </div>
         <div>
-          <p id="timerDisplay">00:00:00</p>
-          <p id="totalhrs">Total Time Enjoyed ! :</p>
+          <span style="font-size: 14px; color: black; font-weight: bold; margin-right: 8px;">Current Session:</span>
+          <p id="timerDisplay" style="display: inline-block; margin: 0;">00:00:00</p>
+          <br><br>
+          <span style="font-size: 14px; color: black; font-weight: bold; margin-right: 8px;">Total Time Enjoyed:</span>
+          <span id="totalTimeDisplay" style="font-size: 14px; color: black; font-weight: bold;">00:00:00</span>
         </div>
       </div>
       <div class="right-section">
@@ -307,12 +450,36 @@
     </div>
   </div>
 
+  <!-- Add Project Dialog -->
+<div id="addProjectDialog" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.55); z-index:99999; align-items:center; justify-content:center;">
+  <form id="addProjectForm" style="background:#181c20; border:3px solid #00fff7; border-radius:20px; box-shadow:0 12px 40px #000a; padding:48px 48px 32px 48px; display:flex; flex-direction:column; align-items:center; min-width:400px; max-width:96vw;">
+    <h3 style="color:#00fff7; margin-bottom:24px; font-size:20px;">New Game Project !</h3>
+    <input id="newProjectName" type="text" placeholder="Project Name" style="width:100%; font-size:18px; padding:14px; margin-bottom:18px; border-radius:8px; border:2px solid #00fff7; background:#222; color:#fff; outline:none;" required />
+    <select id="newProjectLevel" style="width:100%; font-size:18px; padding:14px; margin-bottom:18px; border-radius:8px; border:2px solid #00fff7; background:#222; color:#fff; outline:none;">
+      <option value="" disabled selected>Project Level</option>
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Advanced">Advanced</option>
+    </select>
+    <select id="newProjectType" style="width:100%; font-size:18px; padding:14px; margin-bottom:18px; border-radius:8px; border:2px solid #00fff7; background:#222; color:#fff; outline:none;">
+      <option value="" disabled selected>Project Type</option>
+      <option value="individual">Individual</option>
+      <option value="club">Club-Meeting</option>
+    </select>
+    <div style="display:flex; gap:24px; width:100%; justify-content:center;">
+      <button type="submit" style="background:#00fff7; color:#181c20; border:none; border-radius:8px; padding:14px 32px; font-size:18px; font-family:'Press Start 2P',monospace; cursor:pointer;">Add</button>
+      <button type="button" id="cancelAddProject" style="background:#333; color:#fff; border:none; border-radius:8px; padding:14px 32px; font-size:18px; font-family:'Press Start 2P',monospace; cursor:pointer;">Cancel</button>
+    </div>
+  </form>
+</div>
+
   <script>
     let startTime = 0;
     let elapsedTime = 0;
     let timerInterval = null;
     let isRunning = false;
     const audio = new Audio('./audio/click.mp3');
+    let totalElapsedTime = 0;
 
     function setWheelPaused(paused) {
       document.getElementById("giantWheel").style.display = paused ? "none" : "block";
@@ -360,6 +527,9 @@
     }
 
     function cancelTimer() {
+      if (!confirm("Are you sure you want to cancel this session? Time from this session will NOT be added to your total!")) {
+        return;
+      }
       clearInterval(timerInterval);
       timerInterval = null;
       isRunning = false;
@@ -373,6 +543,16 @@
       document.getElementById("logFields").style.display = "none";
       setWheelPaused(true); // Show static, hide GIF
       audio.play();
+      // Do NOT add to totalElapsedTime on cancel
+      // updateTotalTimeDisplay(); // No need to update since totalElapsedTime is unchanged
+    }
+
+    function updateTotalTimeDisplay() {
+      const total = totalElapsedTime;
+      const hrs = Math.floor(total / 3600000).toString().padStart(2, '0');
+      const mins = Math.floor((total % 3600000) / 60000).toString().padStart(2, '0');
+      const secs = Math.floor((total % 60000) / 1000).toString().padStart(2, '0');
+      document.getElementById("totalTimeDisplay").innerText = `${hrs}:${mins}:${secs}`;
     }
 
     function pauseTimer() {
@@ -413,6 +593,9 @@
           document.getElementById("photoCDN").value = "";
           document.getElementById("videoCDN").value = "";
           document.getElementById("description").value = "";
+          // Only add to totalElapsedTime on successful log
+          totalElapsedTime += elapsedTime;
+          updateTotalTimeDisplay();
           cancelTimer();
         } else {
           alert(`❌ ERROR: ${result.error}`);
@@ -423,9 +606,249 @@
       }
     }
 
+    // Project sidebar left-click menu
+const projectList = document.getElementById('projectList');
+const projectMenu = document.getElementById('projectMenu');
+let menuTarget = null;
+
+projectList.addEventListener('click', function(e) {
+  if (e.target.tagName === 'LI') {
+    menuTarget = e.target;
+    const rect = e.target.getBoundingClientRect();
+    projectMenu.style.display = 'block';
+    projectMenu.style.left = (rect.right + 8) + 'px';
+    projectMenu.style.top = (rect.top + window.scrollY) + 'px';
+  }
+});
+
+document.addEventListener('click', function(e) {
+  if (!projectMenu.contains(e.target) && !projectList.contains(e.target)) {
+    projectMenu.style.display = 'none';
+  }
+});
+
+// Optional: handle menu actions
+projectMenu.addEventListener('click', function(e) {
+  if (e.target.classList.contains('menu-item')) {
+    alert(`You selected '${e.target.textContent}' for project '${menuTarget ? menuTarget.textContent : ''}'`);
+    projectMenu.style.display = 'none';
+  }
+});
+
     window.onload = function() {
   alert("NOTE: THE LOGGER IS IN DEV AND ONLY FRONTEND FUNCTIONALITY IS IMPLEMENTED. THE BACKEND IS NOT YET READY. YOU CAN STILL TEST THE UI AND LOGIC.");
 };
+document.getElementById('addProjectBtn').onclick = function() {
+  document.getElementById('addProjectDialog').style.display = 'flex';
+  document.getElementById('newProjectName').value = '';
+  document.getElementById('newProjectLevel').selectedIndex = 0;
+  document.getElementById('newProjectType').selectedIndex = 0;
+  document.getElementById('newProjectOwner').value = '';
+  document.getElementById('newProjectName').focus();
+};
+
+document.getElementById('cancelAddProject').onclick = function() {
+  document.getElementById('addProjectDialog').style.display = 'none';
+};
+
+document.getElementById('addProjectForm').onsubmit = function(e) {
+  e.preventDefault();
+  const name = document.getElementById('newProjectName').value.trim();
+  const level = document.getElementById('newProjectLevel').value;
+  const type = document.getElementById('newProjectType').value;
+  // const owner = document.getElementById('newProjectOwner').value.trim(); // Not present in current form
+  if (name && level && type) {
+    const li = document.createElement('li');
+    li.textContent = name;
+    document.getElementById('projectList').appendChild(li);
+    document.getElementById('addProjectDialog').style.display = 'none';
+    // Add to navbar
+    const nav = document.querySelector('nav');
+    if (nav) {
+      const navItem = document.createElement('span');
+      navItem.textContent = name;
+      navItem.style.marginLeft = '18px';
+      navItem.style.color = '#00fff7';
+      navItem.style.fontWeight = 'bold';
+      nav.appendChild(navItem);
+    }
+  }
+};
+// Add this at the end of your <script> section
+window.addEventListener('DOMContentLoaded', function() {
+  function showModal(id) {
+    document.getElementById(id).style.display = 'flex';
+  }
+  function hideModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  // Check for API key in localStorage
+  if (!localStorage.getItem('apiKey')) {
+    showModal('registerModal');
+  }
+
+  // Registration form logic
+  document.getElementById('registerForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('registerEmail').value;
+    const msg = document.getElementById('registerMsg');
+    msg.style.display = 'none';
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await res.json();
+      if (res.ok) {
+        msg.style.display = 'block';
+        msg.style.color = 'green';
+        msg.innerText = 'API key sent to your email!';
+        setTimeout(() => {
+          hideModal('registerModal');
+          showModal('apiKeyModal');
+        }, 1500);
+      } else {
+        msg.style.display = 'block';
+        msg.style.color = 'red';
+        msg.innerText = result.error || 'Registration failed.';
+      }
+    } catch (err) {
+      msg.style.display = 'block';
+      msg.style.color = 'red';
+      msg.innerText = 'Network error.';
+    }
+  };
+
+  // API key input form logic
+  document.getElementById('apiKeyForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const msg = document.getElementById('apiKeyMsg');
+    msg.style.display = 'none';
+    // Check API key with backend
+    try {
+      const res = await fetch('/api/validate-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey })
+      });
+      const result = await res.json();
+      if (res.ok && result.valid) {
+        localStorage.setItem('apiKey', apiKey);
+        hideModal('apiKeyModal');
+        // Redirect or show logger UI
+        // window.location.href = '/logger.html'; // If you have a separate logger page
+        alert('API key saved! You can now log your hours.');
+      } else {
+        msg.style.display = 'block';
+        msg.innerText = 'Invalid API key.';
+      }
+    } catch (err) {
+      msg.style.display = 'block';
+      msg.innerText = 'Network error.';
+    }
+  };
+
+  // Modify submitLog to include API key
+  window.submitLog = async function() {
+    audio.play();
+    const photosCDN = document.getElementById("photoCDN").value;
+    const videoCDN = document.getElementById("videoCDN").value;
+    const timeSpent = document.getElementById("timerDisplay").innerText;
+    const description = document.getElementById("description").value;
+    const apiKey = localStorage.getItem('apiKey');
+
+    if (!apiKey) {
+      alert("API key missing. Please register and enter your API key.");
+      showModal('registerModal');
+      return;
+    }
+
+    const data = {
+      timeSpent,
+      description,
+      photosCDN,
+      videoCDN,
+      apiKey
+    };
+
+    try {
+      const response = await fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("✅ LOG SUBMITTED!");
+        document.getElementById("photoCDN").value = "";
+        document.getElementById("videoCDN").value = "";
+        document.getElementById("description").value = "";
+        totalElapsedTime += elapsedTime;
+        updateTotalTimeDisplay();
+        cancelTimer();
+      } else {
+        alert(`❌ ERROR: ${result.error}`);
+      }
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+      alert("❌ Failed to submit log. See console.");
+    }
+  };
+
+  document.getElementById('alreadyHaveApiKey').onclick = function(e) {
+    e.preventDefault();
+    // Immediately hide the registration modal and show the API key modal
+    hideModal('registerModal');
+    showModal('apiKeyModal');
+  };
+});
+// ...inside document.getElementById('apiKeyForm').onsubmit = async function(e) { ...
+if (res.ok && result.valid) {
+  localStorage.setItem('apiKey', apiKey);
+  hideModal('apiKeyModal');
+  // Redirect or show logger UI
+  // window.location.href = '/logger.html'; // If you have a separate logger page
+  alert('API key saved! You can now log your hours.');
+} else {
+  msg.style.display = 'block';
+  msg.innerText = 'Invalid API key.';
+}
+// Add this inside your window.addEventListener('DOMContentLoaded', function() { ... });
+document.getElementById('alreadyHaveApiKey').onclick = function(e) {
+  e.preventDefault();
+  // Immediately hide the registration modal and show the API key modal
+  hideModal('registerModal');
+  showModal('apiKeyModal');
+};
+
   </script>
+  <!-- Add these modals just before </body> -->
+<div id="registerModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
+  <form id="registerForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
+    <h3>Register to Get API Key</h3>
+    <input id="registerEmail" type="email" placeholder="Enter your email" required style="margin-bottom:18px; width:100%; padding:10px;">
+    <button type="submit" style="padding:10px 24px;">Register</button>
+    <div id="registerMsg" style="margin-top:12px; color:green; display:none;"></div>
+  <!-- Add this line just above the closing </form> tag in #registerForm -->
+<div style="margin-top:10px;">
+  <a href="#" id="alreadyHaveApiKey" style="font-size:12px; color:black; text-decoration:underline; cursor:pointer;">
+    Already have an API key?
+  </a>
+</div>
+  </form>
+</div>
+<div id="apiKeyModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
+  <form id="apiKeyForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
+    <h3>Enter Your API Key</h3>
+    <input id="apiKeyInput" type="text" placeholder="Paste your API key" required style="margin-bottom:18px; width:100%; padding:10px;">
+    <button type="submit" style="padding:10px 24px;">Submit</button>
+    <div id="apiKeyMsg" style="margin-top:12px; color:red; display:none;"></div>
+  </form>
+</div>
 </body>
 </html>

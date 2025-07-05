@@ -13,8 +13,10 @@
     "airtable": "^0.12.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
-    "nodemailer": "^7.0.3"
+    "express-middleware": "^3.4.2",
+    "nodemailer": "^7.0.4"
   }
 }

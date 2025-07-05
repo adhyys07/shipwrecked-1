@@ -1,0 +1,20 @@
+{
+  "name": "api-key-logger-app",
+  "version": "1.0.0",
+  "description": "1. Create a new base in Airtable named \"UserAPIKeys\". 2. Create a table named \"Users\" with the following fields:    - `Email` (Single line text)    - `API Key` (Single line text)",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0"
+  }
+}
