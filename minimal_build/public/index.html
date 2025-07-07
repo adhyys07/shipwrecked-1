@@ -378,6 +378,10 @@
   </style>
 </head>
 <body>
+    <div id="apiKeyDebug" style="position:fixed;top:10px;right:20px;z-index:100000;background:#fff;color:#222;padding:8px 18px;border-radius:8px;font-size:13px;box-shadow:0 2px 8px #0002;opacity:0.95;">
+    API Key: <span id="apiKeyDebugValue" style="font-family:monospace;"></span>
+    <button id="clearApiKeyBtn" style="margin-left:10px;font-size:11px;">Clear</button>
+  </div>
   <div class="sidebar">
     <h2>Your Projects</h2>
     <ul id="projectList">
@@ -825,7 +829,27 @@ document.getElementById('alreadyHaveApiKey').onclick = function(e) {
   hideModal('registerModal');
   showModal('apiKeyModal');
 };
+// ...existing code...
 
+// Debug: Show API key at top right
+function updateApiKeyDebug() {
+  const val = localStorage.getItem('apiKey') || '(none)';
+  document.getElementById('apiKeyDebugValue').textContent = val;
+}
+updateApiKeyDebug();
+
+document.getElementById('clearApiKeyBtn').onclick = function() {
+  localStorage.removeItem('apiKey');
+  updateApiKeyDebug();
+  alert('API key cleared from localStorage.');
+};
+
+// Also update debug display whenever API key is set
+const origSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+  origSetItem.apply(this, arguments);
+  if (key === 'apiKey') updateApiKeyDebug();
+};
   </script>
   <!-- Add these modals just before </body> -->
 <div id="registerModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
