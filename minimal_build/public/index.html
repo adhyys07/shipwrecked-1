@@ -72,12 +72,12 @@
 
     .centered-container {
       display: flex;
-      justify-content: flex-start; /* Shift content to the left */
+      justify-content: flex-start;
       align-items: center;
       height: 100vh;
       width: 100vw;
       padding: 0;
-      margin-left: 220px; /* Push main content to the right of sidebar */
+      margin-left: 220px;
     }
 
     .panel {
@@ -85,21 +85,20 @@
       padding: 30px;
       border: 5px solid black;
       border-radius: 0;
-      width: 78vw;           /* Increased from 65vw */
-      max-width: 1600px;     /* Increased from 900px */
-      min-width: 1250px;      /* Increased from 600px */
-      height: 70vh;          /* Increased from 60vh */
-      max-height: 600px;     /* Increased from 500px */
-      min-height: 600px;     /* Increased from 350px */
+      width: 78vw;
+      max-width: 1600px;
+      min-width: 1250px;
+      height: 70vh;
+      max-height: 600px;
+      min-height: 600px;
       display: flex;
       flex-direction: row;
       align-items: stretch;
       box-sizing: border-box;
       gap: 32px;
-      margin-left: 30px;    /* Smaller gap from sidebar */
+      margin-left: 30px;
     }
     
-/* Add this after your .panel styles */
 .fairy-lights {
   position: absolute;
   top: -24px;
@@ -158,7 +157,7 @@
     }
 
     .right-section {
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: stretch;
       padding-left: 24px;
       display: flex;
@@ -210,6 +209,24 @@
       background-color: grey;
     }
 
+    #changeApiKeyBtn:hover {
+      background-color: #ff5252 !important;
+      transform: translate(0.5px, 0.5px);
+      box-shadow: 0.5px 0.5px 0px #333 !important;
+    }
+
+    #registerNewBtn:hover {
+      background-color: #26a69a !important;
+      transform: translate(0.5px, 0.5px);
+      box-shadow: 0.5px 0.5px 0px #333 !important;
+    }
+
+    #clearApiKeyBtn:hover {
+      background-color: #cc0000 !important;
+      transform: translate(0.5px, 0.5px);
+      box-shadow: 0.5px 0.5px 0px #333 !important;
+    }
+
     #timerDisplay {
       text-align: center;
       font-size: 14px;
@@ -228,44 +245,43 @@
       color: white;
     }
 
-    .button-row {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 40px;
-      margin-top: auto;
-    }
-
-    .button-row button {
-      flex: unset;
-      width: 220px;
-      margin: 0 auto;
-    }
-
-    /* Giant Wheel Animation Styles */
-.wheel-container {
+ .button-row {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
-  width: 100%;
-  height: 400px; /* or your preferred height */
-  position: relative;
-  overflow: hidden;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  margin-top: auto;
 }
 
-.wheel {
-  width: 420px;
-  height: 420px;
-  object-fit: contain;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  /* Cyan glow effect */
-  filter: drop-shadow(0 0 2px #00fff7) drop-shadow(0 0 4px #00fff7);
+.button-row button {
+  flex: 1;
+  width: 105px;
+  margin: 0;
 }
+
+    .wheel-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+      width: 100%;
+      height: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wheel {
+      width: 420px;
+      height: 420px;
+      object-fit: contain;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 0 2px #00fff7) drop-shadow(0 0 4px #00fff7);
+    }
 
     .wheel.paused {
       animation-play-state: paused;
@@ -301,7 +317,6 @@
       }
     }
 
-    /* Add Project Dialog Styles */
 #addProjectDialog {
   display: none;
   position: fixed;
@@ -378,10 +393,13 @@
   </style>
 </head>
 <body>
-    <div id="apiKeyDebug" style="position:fixed;top:10px;right:20px;z-index:100000;background:#fff;color:#222;padding:8px 18px;border-radius:8px;font-size:13px;box-shadow:0 2px 8px #0002;opacity:0.95;">
-    API Key: <span id="apiKeyDebugValue" style="font-family:monospace;"></span>
-    <button id="clearApiKeyBtn" style="margin-left:10px;font-size:11px;">Clear</button>
+  <!-- Top Right Clear API Key Button -->
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <button id="clearApiKeyBtn" style="font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 8px 12px; background: #ff4444; color: #fff; border: 2px solid #000; border-radius: 0; cursor: pointer; box-shadow: 2px 2px 0px #333; text-shadow: 1px 1px 0px #000;">
+      CLEAR API KEY
+    </button>
   </div>
+  
   <div class="sidebar">
     <h2>Your Projects</h2>
     <ul id="projectList">
@@ -389,7 +407,6 @@
       <li>Project Beta</li>
       <li>Project Gamma</li>
       <li>Project Delta</li>
-      <!-- Add more projects as needed -->
     </ul>
     <div id="projectMenu" style="display:none; position:fixed; z-index:9999; background:#222; color:#fff; border:2px solid #00fff7; border-radius:8px; min-width:140px; box-shadow:0 4px 16px #000a; font-family:'Press Start 2P',monospace; font-size:12px;">
       <div class="menu-item" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid #00fff7;">Open</div>
@@ -430,8 +447,11 @@
         </div>
       </div>
       <div class="right-section">
-        <div class="button-row">
-          <button id="startPauseBtn" onclick="toggleTimer()">START LOGGING</button>
+        <div style="background: #000; padding: 10px; margin-bottom: 15px; border: 2px solid #00fff7; border-radius: 0; box-shadow: 2px 2px 0px #333;">
+          <label style="font-size: 7px; color: #00fff7; margin-bottom: 6px; display: block; font-family: 'Press Start 2P', monospace; text-transform: uppercase;">API KEY STATUS:</label>
+          <div id="apiKeyStatus" style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #fff; word-break: break-all; background: #222; padding: 8px; border: 1px solid #00fff7; border-radius: 0; text-shadow: 1px 1px 0px #000; line-height: 1.2;">
+            Loading...
+          </div>
         </div>
         <div id="logFields" style="display: none;">
           <div class="uploads">
@@ -444,18 +464,20 @@
             <label for="description">PROGRESS DESCRIPTION:</label>
             <textarea id="description" rows="6" placeholder="DESCRIBE YOUR PROGRESS..."></textarea>
           </div>
-          <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+          <div class="button-row">
             <button id="cancelBtn" onclick="cancelTimer()" style="display: none;">CANCEL</button>
-            <button id="pauseBtn" onclick="pauseTimer()" style="display: none;">PAUSE</button>
+            <button id="startPauseBtn2" onclick="toggleTimer()" style="display: none;">PAUSE/RESUME</button>
           </div>
           <button onclick="submitLog()">SUBMIT LOG</button>
+        </div>
+        <div class="button-row">
+          <button id="startPauseBtn" onclick="toggleTimer()">START LOGGING</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Add Project Dialog -->
-<div id="addProjectDialog" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.55); z-index:99999; align-items:center; justify-content:center;">
+  <div id="addProjectDialog" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.55); z-index:99999; align-items:center; justify-content:center;">
   <form id="addProjectForm" style="background:#181c20; border:3px solid #00fff7; border-radius:20px; box-shadow:0 12px 40px #000a; padding:48px 48px 32px 48px; display:flex; flex-direction:column; align-items:center; min-width:400px; max-width:96vw;">
     <h3 style="color:#00fff7; margin-bottom:24px; font-size:20px;">New Game Project !</h3>
     <input id="newProjectName" type="text" placeholder="Project Name" style="width:100%; font-size:18px; padding:14px; margin-bottom:18px; border-radius:8px; border:2px solid #00fff7; background:#222; color:#fff; outline:none;" required />
@@ -490,13 +512,25 @@
       document.getElementById("giantWheelStatic").style.display = paused ? "block" : "none";
     }
 
-    // Show static image on load
     setWheelPaused(true);
+    
+    // Initialize API key status on page load
+    updateApiKeyStatus();
+
+    // Add functionality to clear API key button
+    document.getElementById('clearApiKeyBtn').onclick = function() {
+      if (confirm('Are you sure you want to clear your API key? In future you have to use the same key to load your progress.')) {
+        localStorage.removeItem('apiKey');
+        updateApiKeyStatus();
+        alert('API key cleared successfully!');
+        location.reload();
+      }
+    };
 
     function toggleTimer() {
       const startPauseBtn = document.getElementById("startPauseBtn");
+      const startPauseBtn2 = document.getElementById("startPauseBtn2");
       const cancelBtn = document.getElementById("cancelBtn");
-      const pauseBtn = document.getElementById("pauseBtn");
       const logFields = document.getElementById("logFields");
       audio.play();
 
@@ -504,18 +538,29 @@
         startTime = Date.now() - elapsedTime;
         timerInterval = setInterval(updateTimer, 1000);
         isRunning = true;
-        startPauseBtn.innerText = "PAUSE LOGGING";
+        startPauseBtn.style.display = "none";
+        startPauseBtn2.style.display = "block";
+        startPauseBtn2.innerText = "PAUSE LOGGING";
         cancelBtn.style.display = "block";
-        pauseBtn.style.display = "block";
         logFields.style.display = "block";
-        setWheelPaused(false); // Show GIF, hide static
+        updateApiKeyStatus();
+        setWheelPaused(false);
       } else {
         clearInterval(timerInterval);
         elapsedTime = Date.now() - startTime;
         isRunning = false;
-        startPauseBtn.innerText = "START LOGGING";
-        setWheelPaused(true); // Show static, hide GIF
-        pauseBtn.style.display = "none";
+        startPauseBtn2.innerText = "RESUME LOGGING";
+        setWheelPaused(true);
+      }
+    }
+
+    function updateApiKeyStatus() {
+      const apiKey = localStorage.getItem('apiKey');
+      const statusDiv = document.getElementById('apiKeyStatus');
+      if (apiKey) {
+        statusDiv.innerHTML = `<span style="color: green;">✓ Active:</span> ${apiKey}`;
+      } else {
+        statusDiv.innerHTML = `<span style="color: red;">✗ No API Key Set</span>`;
       }
     }
 
@@ -541,14 +586,13 @@
       elapsedTime = 0;
 
       document.getElementById("timerDisplay").innerText = "00:00:00";
+      document.getElementById("startPauseBtn").style.display = "block";
       document.getElementById("startPauseBtn").innerText = "START LOGGING";
+      document.getElementById("startPauseBtn2").style.display = "none";
       document.getElementById("cancelBtn").style.display = "none";
-      document.getElementById("pauseBtn").style.display = "none";
       document.getElementById("logFields").style.display = "none";
-      setWheelPaused(true); // Show static, hide GIF
+      setWheelPaused(true);
       audio.play();
-      // Do NOT add to totalElapsedTime on cancel
-      // updateTotalTimeDisplay(); // No need to update since totalElapsedTime is unchanged
     }
 
     function updateTotalTimeDisplay() {
@@ -559,32 +603,30 @@
       document.getElementById("totalTimeDisplay").innerText = `${hrs}:${mins}:${secs}`;
     }
 
-    function pauseTimer() {
-      if (isRunning) {
-        clearInterval(timerInterval);
-        elapsedTime = Date.now() - startTime;
-        isRunning = false;
-        document.getElementById("startPauseBtn").innerText = "RESUME LOGGING";
-        setWheelPaused(true); // Show static, hide GIF
-      }
-    }
-
     async function submitLog() {
       audio.play();
       const photosCDN = document.getElementById("photoCDN").value;
       const videoCDN = document.getElementById("videoCDN").value;
       const timeSpent = document.getElementById("timerDisplay").innerText;
       const description = document.getElementById("description").value;
+      const apiKey = localStorage.getItem('apiKey');
+
+      if (!apiKey) {
+        alert("API key missing. Please register and enter your API key.");
+        showModal('registerModal');
+        return;
+      }
 
       const data = {
         timeSpent,
         description,
         photosCDN,
-        videoCDN
+        videoCDN,
+        apiKey
       };
 
       try {
-        const response = await fetch('/api/log', {
+        const response = await fetch('/api/log-time', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -597,7 +639,6 @@
           document.getElementById("photoCDN").value = "";
           document.getElementById("videoCDN").value = "";
           document.getElementById("description").value = "";
-          // Only add to totalElapsedTime on successful log
           totalElapsedTime += elapsedTime;
           updateTotalTimeDisplay();
           cancelTimer();
@@ -610,262 +651,183 @@
       }
     }
 
-    // Project sidebar left-click menu
-const projectList = document.getElementById('projectList');
-const projectMenu = document.getElementById('projectMenu');
-let menuTarget = null;
+    const projectList = document.getElementById('projectList');
+    const projectMenu = document.getElementById('projectMenu');
+    let menuTarget = null;
 
-projectList.addEventListener('click', function(e) {
-  if (e.target.tagName === 'LI') {
-    menuTarget = e.target;
-    const rect = e.target.getBoundingClientRect();
-    projectMenu.style.display = 'block';
-    projectMenu.style.left = (rect.right + 8) + 'px';
-    projectMenu.style.top = (rect.top + window.scrollY) + 'px';
-  }
-});
-
-document.addEventListener('click', function(e) {
-  if (!projectMenu.contains(e.target) && !projectList.contains(e.target)) {
-    projectMenu.style.display = 'none';
-  }
-});
-
-// Optional: handle menu actions
-projectMenu.addEventListener('click', function(e) {
-  if (e.target.classList.contains('menu-item')) {
-    alert(`You selected '${e.target.textContent}' for project '${menuTarget ? menuTarget.textContent : ''}'`);
-    projectMenu.style.display = 'none';
-  }
-});
-
-    window.onload = function() {
-  alert("NOTE: THE LOGGER IS IN DEV AND ONLY FRONTEND FUNCTIONALITY IS IMPLEMENTED. THE BACKEND IS NOT YET READY. YOU CAN STILL TEST THE UI AND LOGIC.");
-};
-document.getElementById('addProjectBtn').onclick = function() {
-  document.getElementById('addProjectDialog').style.display = 'flex';
-  document.getElementById('newProjectName').value = '';
-  document.getElementById('newProjectLevel').selectedIndex = 0;
-  document.getElementById('newProjectType').selectedIndex = 0;
-  document.getElementById('newProjectOwner').value = '';
-  document.getElementById('newProjectName').focus();
-};
-
-document.getElementById('cancelAddProject').onclick = function() {
-  document.getElementById('addProjectDialog').style.display = 'none';
-};
-
-document.getElementById('addProjectForm').onsubmit = function(e) {
-  e.preventDefault();
-  const name = document.getElementById('newProjectName').value.trim();
-  const level = document.getElementById('newProjectLevel').value;
-  const type = document.getElementById('newProjectType').value;
-  // const owner = document.getElementById('newProjectOwner').value.trim(); // Not present in current form
-  if (name && level && type) {
-    const li = document.createElement('li');
-    li.textContent = name;
-    document.getElementById('projectList').appendChild(li);
-    document.getElementById('addProjectDialog').style.display = 'none';
-    // Add to navbar
-    const nav = document.querySelector('nav');
-    if (nav) {
-      const navItem = document.createElement('span');
-      navItem.textContent = name;
-      navItem.style.marginLeft = '18px';
-      navItem.style.color = '#00fff7';
-      navItem.style.fontWeight = 'bold';
-      nav.appendChild(navItem);
-    }
-  }
-};
-// Add this at the end of your <script> section
-window.addEventListener('DOMContentLoaded', function() {
-  function showModal(id) {
-    document.getElementById(id).style.display = 'flex';
-  }
-  function hideModal(id) {
-    document.getElementById(id).style.display = 'none';
-  }
-
-  // Check for API key in localStorage
-  if (!localStorage.getItem('apiKey')) {
-    showModal('registerModal');
-  }
-
-  // Registration form logic
-  document.getElementById('registerForm').onsubmit = async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('registerEmail').value;
-    const msg = document.getElementById('registerMsg');
-    msg.style.display = 'none';
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const result = await res.json();
-      if (res.ok) {
-        msg.style.display = 'block';
-        msg.style.color = 'green';
-        msg.innerText = 'API key sent to your email!';
-        setTimeout(() => {
-          hideModal('registerModal');
-          showModal('apiKeyModal');
-        }, 1500);
-      } else {
-        msg.style.display = 'block';
-        msg.style.color = 'red';
-        msg.innerText = result.error || 'Registration failed.';
+    projectList.addEventListener('click', function(e) {
+      if (e.target.tagName === 'LI') {
+        menuTarget = e.target;
+        const rect = e.target.getBoundingClientRect();
+        projectMenu.style.display = 'block';
+        projectMenu.style.left = (rect.right + 8) + 'px';
+        projectMenu.style.top = (rect.top + window.scrollY) + 'px';
       }
-    } catch (err) {
-      msg.style.display = 'block';
-      msg.style.color = 'red';
-      msg.innerText = 'Network error.';
-    }
-  };
+    });
 
-  // API key input form logic
-  document.getElementById('apiKeyForm').onsubmit = async function(e) {
-    e.preventDefault();
-    const apiKey = document.getElementById('apiKeyInput').value.trim();
-    const msg = document.getElementById('apiKeyMsg');
-    msg.style.display = 'none';
-    // Check API key with backend
-    try {
-      const res = await fetch('/api/validate-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey })
-      });
-      const result = await res.json();
-      if (res.ok && result.valid) {
-        localStorage.setItem('apiKey', apiKey);
-        hideModal('apiKeyModal');
-        // Redirect or show logger UI
-        // window.location.href = '/logger.html'; // If you have a separate logger page
-        alert('API key saved! You can now log your hours.');
-      } else {
-        msg.style.display = 'block';
-        msg.innerText = 'Invalid API key.';
+    document.addEventListener('click', function(e) {
+      if (!projectMenu.contains(e.target) && !projectList.contains(e.target)) {
+        projectMenu.style.display = 'none';
       }
-    } catch (err) {
-      msg.style.display = 'block';
-      msg.innerText = 'Network error.';
-    }
-  };
+    });
 
-  // Modify submitLog to include API key
-  window.submitLog = async function() {
-    audio.play();
-    const photosCDN = document.getElementById("photoCDN").value;
-    const videoCDN = document.getElementById("videoCDN").value;
-    const timeSpent = document.getElementById("timerDisplay").innerText;
-    const description = document.getElementById("description").value;
-    const apiKey = localStorage.getItem('apiKey');
+    projectMenu.addEventListener('click', function(e) {
+      if (e.target.classList.contains('menu-item')) {
+        alert(`You selected '${e.target.textContent}' for project '${menuTarget ? menuTarget.textContent : ''}'`);
+        projectMenu.style.display = 'none';
+      }
+    });
 
-    if (!apiKey) {
-      alert("API key missing. Please register and enter your API key.");
-      showModal('registerModal');
-      return;
-    }
-
-    const data = {
-      timeSpent,
-      description,
-      photosCDN,
-      videoCDN,
-      apiKey
+    document.getElementById('addProjectBtn').onclick = function() {
+      document.getElementById('addProjectDialog').style.display = 'flex';
+      document.getElementById('newProjectName').value = '';
+      document.getElementById('newProjectLevel').selectedIndex = 0;
+      document.getElementById('newProjectType').selectedIndex = 0;
+      document.getElementById('newProjectName').focus();
     };
 
-    try {
-      const response = await fetch('/api/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+    document.getElementById('cancelAddProject').onclick = function() {
+      document.getElementById('addProjectDialog').style.display = 'none';
+    };
 
-      const result = await response.json();
-
-      if (response.ok) {
-        alert("✅ LOG SUBMITTED!");
-        document.getElementById("photoCDN").value = "";
-        document.getElementById("videoCDN").value = "";
-        document.getElementById("description").value = "";
-        totalElapsedTime += elapsedTime;
-        updateTotalTimeDisplay();
-        cancelTimer();
-      } else {
-        alert(`❌ ERROR: ${result.error}`);
+    document.getElementById('addProjectForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newProjectName').value.trim();
+      const level = document.getElementById('newProjectLevel').value;
+      const type = document.getElementById('newProjectType').value;
+      if (name && level && type) {
+        const li = document.createElement('li');
+        li.textContent = name;
+        document.getElementById('projectList').appendChild(li);
+        document.getElementById('addProjectDialog').style.display = 'none';
+        const nav = document.querySelector('nav');
+        if (nav) {
+          const navItem = document.createElement('span');
+          navItem.textContent = name;
+          navItem.style.marginLeft = '18px';
+          navItem.style.color = '#00fff7';
+          navItem.style.fontWeight = 'bold';
+          nav.appendChild(navItem);
+        }
       }
-    } catch (err) {
-      console.error("❌ Submission failed:", err);
-      alert("❌ Failed to submit log. See console.");
-    }
-  };
+    };
 
-  document.getElementById('alreadyHaveApiKey').onclick = function(e) {
-    e.preventDefault();
-    // Immediately hide the registration modal and show the API key modal
-    hideModal('registerModal');
-    showModal('apiKeyModal');
-  };
-});
-// ...inside document.getElementById('apiKeyForm').onsubmit = async function(e) { ...
-if (res.ok && result.valid) {
-  localStorage.setItem('apiKey', apiKey);
-  hideModal('apiKeyModal');
-  // Redirect or show logger UI
-  // window.location.href = '/logger.html'; // If you have a separate logger page
-  alert('API key saved! You can now log your hours.');
-} else {
-  msg.style.display = 'block';
-  msg.innerText = 'Invalid API key.';
-}
-// Add this inside your window.addEventListener('DOMContentLoaded', function() { ... });
-document.getElementById('alreadyHaveApiKey').onclick = function(e) {
-  e.preventDefault();
-  // Immediately hide the registration modal and show the API key modal
-  hideModal('registerModal');
-  showModal('apiKeyModal');
-};
-// ...existing code...
+    window.addEventListener('DOMContentLoaded', function() {
+      function showModal(id) {
+        document.getElementById(id).style.display = 'flex';
+      }
+      function hideModal(id) {
+        document.getElementById(id).style.display = 'none';
+      }
 
-// Debug: Show API key at top right
-function updateApiKeyDebug() {
-  const val = localStorage.getItem('apiKey') || '(none)';
-  document.getElementById('apiKeyDebugValue').textContent = val;
-}
-updateApiKeyDebug();
+      if (!localStorage.getItem('apiKey')) {
+        showModal('registerModal');
+      }
 
-document.getElementById('clearApiKeyBtn').onclick = function() {
-  localStorage.removeItem('apiKey');
-  updateApiKeyDebug();
-  alert('API key cleared from localStorage.');
-};
+      document.getElementById('registerForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('registerEmail').value;
+        const msg = document.getElementById('registerMsg');
+        msg.style.display = 'none';
+        try {
+          const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            msg.style.display = 'block';
+            msg.style.color = 'green';
+            msg.innerText = 'API key sent to your email!';
+            setTimeout(() => {
+              hideModal('registerModal');
+              showModal('apiKeyModal');
+            }, 1500);
+          } else {
+            msg.style.display = 'block';
+            msg.style.color = 'red';
+            msg.innerText = result.error || 'Registration failed.';
+          }
+        } catch (err) {
+          msg.style.display = 'block';
+          msg.style.color = 'red';
+          msg.innerText = 'Network error.';
+        }
+      };
 
-// Also update debug display whenever API key is set
-const origSetItem = localStorage.setItem;
-localStorage.setItem = function(key, value) {
-  origSetItem.apply(this, arguments);
-  if (key === 'apiKey') updateApiKeyDebug();
-};
+      document.getElementById('apiKeyForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const apiKey = document.getElementById('apiKeyInput').value.trim();
+        const msg = document.getElementById('apiKeyMsg');
+        msg.style.display = 'none';
+        try {
+          const res = await fetch('/api/validate-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ apiKey })
+          });
+          const result = await res.json();
+          if (res.ok && result.valid) {
+            localStorage.setItem('apiKey', apiKey);
+            hideModal('apiKeyModal');
+            alert('API key saved! You can now log your hours.');
+            location.reload();
+          } else {
+            msg.style.display = 'block';
+            msg.innerText = 'Invalid API key.';
+          }
+        } catch (err) {
+          msg.style.display = 'block';
+          msg.innerText = 'Network error.';
+        }
+      };
+
+      document.getElementById('alreadyHaveApiKey').onclick = function(e) {
+        e.preventDefault();
+        hideModal('registerModal');
+        showModal('apiKeyModal');
+      };
+
+      function updateApiKeyDebug() {
+        const val = localStorage.getItem('apiKey') || '(none)';
+        document.getElementById('apiKeyDebugValue').textContent = val;
+      }
+      updateApiKeyDebug();
+
+      document.getElementById('clearApiKeyBtn').onclick = function() {
+        if (confirm('Are you sure you want to clear your API key? You will need to register again to log hours.')) {
+          localStorage.removeItem('apiKey');
+          updateApiKeyStatus();
+          alert('API key cleared successfully!');
+        }
+      };
+
+      const origSetItem = localStorage.setItem;
+      localStorage.setItem = function(key, value) {
+        origSetItem.apply(this, arguments);
+        if (key === 'apiKey') {
+          updateApiKeyDebug();
+          updateApiKeyStatus();
+        }
+      };
+    });
   </script>
-  <!-- Add these modals just before </body> -->
+
 <div id="registerModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
   <form id="registerForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
     <h3>Register to Get API Key</h3>
     <input id="registerEmail" type="email" placeholder="Enter your email" required style="margin-bottom:18px; width:100%; padding:10px;">
     <button type="submit" style="padding:10px 24px;">Register</button>
     <div id="registerMsg" style="margin-top:12px; color:green; display:none;"></div>
-  <!-- Add this line just above the closing </form> tag in #registerForm -->
-<div style="margin-top:10px;">
-  <a href="#" id="alreadyHaveApiKey" style="font-size:12px; color:black; text-decoration:underline; cursor:pointer;">
-    Already have an API key?
-  </a>
-</div>
+    <div style="margin-top:10px;">
+      <a href="#" id="alreadyHaveApiKey" style="font-size:12px; color:black; text-decoration:underline; cursor:pointer;">
+        Already have an API key?
+      </a>
+    </div>
   </form>
 </div>
+
 <div id="apiKeyModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
   <form id="apiKeyForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
     <h3>Enter Your API Key</h3>
