@@ -72,7 +72,7 @@ async function sendApiKeyEmail(email, apiKey, isExisting = false) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`API key email sent successfully to ${email}`);
+    console.log(`API key email sent successfully !`);
   } catch (error) {
     console.error('Error sending email:', error);
     throw error;
