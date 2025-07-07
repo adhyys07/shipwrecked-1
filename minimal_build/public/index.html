@@ -70,6 +70,13 @@
   color: #181c20;
 }
 
+.sidebar li.selected-project {
+  background: #00fff7;
+  color: #181c20;
+  font-weight: bold;
+  filter: brightness(0.7);
+}
+
     .centered-container {
       display: flex;
       justify-content: flex-start;
@@ -403,16 +410,7 @@
   <div class="sidebar">
     <h2>Your Projects</h2>
     <ul id="projectList">
-      <li>Project Alpha</li>
-      <li>Project Beta</li>
-      <li>Project Gamma</li>
-      <li>Project Delta</li>
     </ul>
-    <div id="projectMenu" style="display:none; position:fixed; z-index:9999; background:#222; color:#fff; border:2px solid #00fff7; border-radius:8px; min-width:140px; box-shadow:0 4px 16px #000a; font-family:'Press Start 2P',monospace; font-size:12px;">
-      <div class="menu-item" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid #00fff7;">Open</div>
-      <div class="menu-item" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid #00fff7;">Rename</div>
-      <div class="menu-item" style="padding:10px 16px; cursor:pointer;">Delete</div>
-    </div>
     <button id="addProjectBtn" title="Add Project"style="margin-top:auto; width:40px; height:40px; align-self:center; background:#00fff7; color:#181c20; border:none; border-radius:50%; font-size:28px; font-family:'Press Start 2P',monospace; cursor:pointer; box-shadow:0 2px 8px #00fff799; display:flex; align-items:center; justify-content:center;">
       +
     </button>
@@ -506,6 +504,7 @@
     let isRunning = false;
     const audio = new Audio('./audio/click.mp3');
     let totalElapsedTime = 0;
+    let selectedProject = null;
 
     function setWheelPaused(paused) {
       document.getElementById("giantWheel").style.display = paused ? "none" : "block";
@@ -535,6 +534,9 @@
       audio.play();
 
       if (!isRunning) {
+        // Disable project selection visually
+        projectList.style.pointerEvents = 'none';
+        projectList.style.opacity = '0.5';
         startTime = Date.now() - elapsedTime;
         timerInterval = setInterval(updateTimer, 1000);
         isRunning = true;
@@ -546,6 +548,9 @@
         updateApiKeyStatus();
         setWheelPaused(false);
       } else {
+        // Enable project selection
+        projectList.style.pointerEvents = '';
+        projectList.style.opacity = '';
         clearInterval(timerInterval);
         elapsedTime = Date.now() - startTime;
         isRunning = false;
@@ -585,6 +590,10 @@
       startTime = 0;
       elapsedTime = 0;
 
+      // Enable project selection
+      projectList.style.pointerEvents = '';
+      projectList.style.opacity = '';
+
       document.getElementById("timerDisplay").innerText = "00:00:00";
       document.getElementById("startPauseBtn").style.display = "block";
       document.getElementById("startPauseBtn").innerText = "START LOGGING";
@@ -605,15 +614,36 @@
 
     async function submitLog() {
       audio.play();
-      const photosCDN = document.getElementById("photoCDN").value;
-      const videoCDN = document.getElementById("videoCDN").value;
+      const photosCDN = document.getElementById("photoCDN").value.trim();
+      const videoCDN = document.getElementById("videoCDN").value.trim();
       const timeSpent = document.getElementById("timerDisplay").innerText;
-      const description = document.getElementById("description").value;
+      const description = document.getElementById("description").value.trim();
       const apiKey = localStorage.getItem('apiKey');
 
       if (!apiKey) {
         alert("API key missing. Please register and enter your API key.");
         showModal('registerModal');
+        return;
+      }
+      if (!selectedProject) {
+        alert("Please select a project to log time.");
+        return;
+      }
+      if (!photosCDN) {
+        alert("Photo link is required.");
+        return;
+      }
+      if (!videoCDN) {
+        alert("Video link is required.");
+        return;
+      }
+      if (!description) {
+        alert("Description is required.");
+        return;
+      }
+
+      // Confirm submission
+      if (!confirm(`Are you sure want to submit this log?`)) {
         return;
       }
 
@@ -622,7 +652,8 @@
         description,
         photosCDN,
         videoCDN,
-        apiKey
+        apiKey,
+        pname: selectedProject
       };
 
       try {
@@ -631,17 +662,33 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-
         const result = await response.json();
-
         if (response.ok) {
           alert("✅ LOG SUBMITTED!");
           document.getElementById("photoCDN").value = "";
           document.getElementById("videoCDN").value = "";
           document.getElementById("description").value = "";
+          // Add current session duration to totalElapsedTime
           totalElapsedTime += elapsedTime;
           updateTotalTimeDisplay();
-          cancelTimer();
+          // After log, refresh total time for the selected project
+          fetchAndDisplayTotalTime(selectedProject);
+          // Reset current session timer
+          clearInterval(timerInterval);
+          timerInterval = null;
+          isRunning = false;
+          startTime = 0;
+          elapsedTime = 0;
+          // Enable project selection
+          projectList.style.pointerEvents = '';
+          projectList.style.opacity = '';
+          document.getElementById("timerDisplay").innerText = "00:00:00";
+          document.getElementById("startPauseBtn").style.display = "block";
+          document.getElementById("startPauseBtn").innerText = "START LOGGING";
+          document.getElementById("startPauseBtn2").style.display = "none";
+          document.getElementById("cancelBtn").style.display = "none";
+          document.getElementById("logFields").style.display = "none";
+          setWheelPaused(true);
         } else {
           alert(`❌ ERROR: ${result.error}`);
         }
@@ -652,31 +699,41 @@
     }
 
     const projectList = document.getElementById('projectList');
-    const projectMenu = document.getElementById('projectMenu');
-    let menuTarget = null;
-
+    // Highlight selected project and fetch total time
     projectList.addEventListener('click', function(e) {
-      if (e.target.tagName === 'LI') {
-        menuTarget = e.target;
-        const rect = e.target.getBoundingClientRect();
-        projectMenu.style.display = 'block';
-        projectMenu.style.left = (rect.right + 8) + 'px';
-        projectMenu.style.top = (rect.top + window.scrollY) + 'px';
+      if (isRunning) {
+        alert('Cannot switch projects while time logging is active!');
+        return;
+      }
+      if (e.target.tagName === 'LI' && !e.target.classList.contains('no-project')) {
+        // Remove selection from all
+        Array.from(projectList.children).forEach(li => li.classList.remove('selected-project'));
+        // Add selection to clicked
+        e.target.classList.add('selected-project');
+        selectedProject = e.target.textContent;
+        fetchAndDisplayTotalTime(selectedProject);
       }
     });
 
-    document.addEventListener('click', function(e) {
-      if (!projectMenu.contains(e.target) && !projectList.contains(e.target)) {
-        projectMenu.style.display = 'none';
+    // Fetch and display total time for a project
+    async function fetchAndDisplayTotalTime(pname) {
+      const apiKey = localStorage.getItem('apiKey');
+      if (!apiKey || !pname) return;
+      try {
+        const res = await fetch(`/api/project-total-time?pname=${encodeURIComponent(pname)}&apiKey=${encodeURIComponent(apiKey)}`);
+        const data = await res.json();
+        if (res.ok && typeof data.totalTime === 'number') {
+          totalElapsedTime = data.totalTime;
+          updateTotalTimeDisplay();
+        } else {
+          totalElapsedTime = 0;
+          updateTotalTimeDisplay();
+        }
+      } catch (err) {
+        totalElapsedTime = 0;
+        updateTotalTimeDisplay();
       }
-    });
-
-    projectMenu.addEventListener('click', function(e) {
-      if (e.target.classList.contains('menu-item')) {
-        alert(`You selected '${e.target.textContent}' for project '${menuTarget ? menuTarget.textContent : ''}'`);
-        projectMenu.style.display = 'none';
-      }
-    });
+    }
 
     document.getElementById('addProjectBtn').onclick = function() {
       document.getElementById('addProjectDialog').style.display = 'flex';
@@ -690,29 +747,58 @@
       document.getElementById('addProjectDialog').style.display = 'none';
     };
 
-    document.getElementById('addProjectForm').onsubmit = function(e) {
+    document.getElementById('addProjectForm').onsubmit = async function(e) {
       e.preventDefault();
       const name = document.getElementById('newProjectName').value.trim();
       const level = document.getElementById('newProjectLevel').value;
       const type = document.getElementById('newProjectType').value;
-      if (name && level && type) {
-        const li = document.createElement('li');
-        li.textContent = name;
-        document.getElementById('projectList').appendChild(li);
-        document.getElementById('addProjectDialog').style.display = 'none';
-        const nav = document.querySelector('nav');
-        if (nav) {
-          const navItem = document.createElement('span');
-          navItem.textContent = name;
-          navItem.style.marginLeft = '18px';
-          navItem.style.color = '#00fff7';
-          navItem.style.fontWeight = 'bold';
-          nav.appendChild(navItem);
+      const apiKey = localStorage.getItem('apiKey');
+      if (!name || !level || !type) {
+        alert('All fields are required to create a project.');
+        return;
+      }
+      if (!apiKey) {
+        alert('You must be registered and logged in to create a project.');
+        return;
+      }
+      const createdAt = new Date().toISOString();
+      try {
+        const response = await fetch('/api/create-project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, type, level, apiKey, createdAt })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          const li = document.createElement('li');
+          li.textContent = name;
+          document.getElementById('projectList').appendChild(li);
+          document.getElementById('addProjectDialog').style.display = 'none';
+          const nav = document.querySelector('nav');
+          if (nav) {
+            const navItem = document.createElement('span');
+            navItem.textContent = name;
+            navItem.style.marginLeft = '18px';
+            navItem.style.color = '#00fff7';
+            navItem.style.fontWeight = 'bold';
+            nav.appendChild(navItem);
+          }
+          alert('Project created successfully!');
+          location.reload();
+        } else {
+          alert(result.error || 'Failed to create project.');
         }
+      } catch (err) {
+        alert('Network error while creating project.');
       }
     };
 
     window.addEventListener('DOMContentLoaded', function() {
+      // Disable start logging button until projects are loaded
+      const startPauseBtn = document.getElementById('startPauseBtn');
+      startPauseBtn.disabled = true;
+      startPauseBtn.style.opacity = '0.5';
+
       function showModal(id) {
         document.getElementById(id).style.display = 'flex';
       }
@@ -720,20 +806,108 @@
         document.getElementById(id).style.display = 'none';
       }
 
+      // Fetch and render projects for the logged-in user
+      async function loadProjects() {
+        const apiKey = localStorage.getItem('apiKey');
+        const projectList = document.getElementById('projectList');
+        projectList.innerHTML = '';
+        let hasProjects = false;
+        if (!apiKey) return;
+        try {
+          const res = await fetch(`/api/projects?apiKey=${encodeURIComponent(apiKey)}`);
+          const data = await res.json();
+          if (res.ok && Array.isArray(data.projects)) {
+            console.log('Fetched projects:', data.projects); // Debug log
+            if (data.projects.length === 0) {
+              const li = document.createElement('li');
+              li.textContent = 'No projects found.';
+              li.classList.add('no-project');
+              li.style.color = '#888';
+              li.style.fontStyle = 'italic';
+              projectList.appendChild(li);
+              selectedProject = null;
+              totalElapsedTime = 0;
+              updateTotalTimeDisplay();
+              // Show modal to force project creation
+              setTimeout(() => {
+                alert('You must create a project before you can log time.');
+                document.getElementById('addProjectDialog').style.display = 'flex';
+              }, 500);
+              // Disable log fields and start logging button
+              document.getElementById('startPauseBtn').disabled = true;
+              document.getElementById('startPauseBtn').style.opacity = '0.5';
+            } else {
+              hasProjects = true;
+              document.getElementById('startPauseBtn').disabled = false;
+              document.getElementById('startPauseBtn').style.opacity = '';
+              data.projects.forEach((proj, idx) => {
+                const li = document.createElement('li');
+                li.textContent = proj.name || '[No Name]';
+                projectList.appendChild(li);
+                if (idx === 0) {
+                  li.classList.add('selected-project');
+                  selectedProject = li.textContent;
+                  fetchAndDisplayTotalTime(selectedProject);
+                }
+              });
+            }
+          } else {
+            const li = document.createElement('li');
+            li.textContent = 'Failed to load projects.';
+            li.classList.add('no-project');
+            li.style.color = 'red';
+            projectList.appendChild(li);
+            selectedProject = null;
+            totalElapsedTime = 0;
+            updateTotalTimeDisplay();
+            document.getElementById('startPauseBtn').disabled = true;
+            document.getElementById('startPauseBtn').style.opacity = '0.5';
+          }
+        } catch (err) {
+          const li = document.createElement('li');
+          li.textContent = 'Error loading projects.';
+          li.classList.add('no-project');
+          li.style.color = 'red';
+          projectList.appendChild(li);
+          selectedProject = null;
+          totalElapsedTime = 0;
+          updateTotalTimeDisplay();
+          document.getElementById('startPauseBtn').disabled = true;
+          document.getElementById('startPauseBtn').style.opacity = '0.5';
+        }
+      }
+      // Call on load
+      loadProjects();
+
       if (!localStorage.getItem('apiKey')) {
         showModal('registerModal');
       }
 
       document.getElementById('registerForm').onsubmit = async function(e) {
         e.preventDefault();
-        const email = document.getElementById('registerEmail').value;
+        const id = document.getElementById('registerID').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
         const msg = document.getElementById('registerMsg');
         msg.style.display = 'none';
+        if (!id) {
+          msg.style.display = 'block';
+          msg.style.color = 'red';
+          msg.innerText = 'Slack ID is required.';
+          alert('Slack ID is required.');
+          return;
+        }
+        if (!email) {
+          msg.style.display = 'block';
+          msg.style.color = 'red';
+          msg.innerText = 'Email is required.';
+          alert('Email is required.');
+          return;
+        }
         try {
           const res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ id, email })
           });
           const result = await res.json();
           if (res.ok) {
@@ -817,6 +991,7 @@
 <div id="registerModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
   <form id="registerForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
     <h3>Register to Get API Key</h3>
+    <input id="registerID" type="text" placeholder="Enter your Slack ID" required style="margin-bottom:18px; width:100%; padding:10px;">
     <input id="registerEmail" type="email" placeholder="Enter your email" required style="margin-bottom:18px; width:100%; padding:10px;">
     <button type="submit" style="padding:10px 24px;">Register</button>
     <div id="registerMsg" style="margin-top:12px; color:green; display:none;"></div>
@@ -827,7 +1002,6 @@
     </div>
   </form>
 </div>
-
 <div id="apiKeyModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
   <form id="apiKeyForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
     <h3>Enter Your API Key</h3>
