@@ -411,6 +411,45 @@ app.get('/api/project-total-time', async (req, res) => {
   }
 });
 
+// Leaderboard endpoint: returns users sorted by total hours
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    // Fetch all users
+    const users = await base('Users').select({fields: ['slack_id', 'Email', 'API Key']}).all();
+    // Fetch all projects
+    const projects = await base('Projects').select({fields: ['Email', 'totaltime']}).all();
+    // Aggregate total time per user (by email)
+    const userTotals = {};
+    users.forEach(user => {
+      const email = (user.fields.Email || '').toLowerCase();
+      userTotals[email] = { slack_id: user.fields.slack_id || '', totalMs: 0 };
+    });
+    projects.forEach(proj => {
+      const email = (proj.fields.Email || '').toLowerCase();
+      const totaltime = proj.fields.totaltime || '00:00:00';
+      const [h, m, s] = totaltime.split(':').map(Number);
+      const ms = ((h || 0) * 3600 + (m || 0) * 60 + (s || 0)) * 1000;
+      if (userTotals[email]) userTotals[email].totalMs += ms;
+    });
+    // Convert to array and sort
+    const leaderboard = Object.entries(userTotals)
+      .map(([email, obj]) => ({
+        slack_id: obj.slack_id,
+        totalMs: obj.totalMs,
+        totalTimeStr: [
+          String(Math.floor(obj.totalMs/3600000)).padStart(2,'0'),
+          String(Math.floor((obj.totalMs%3600000)/60000)).padStart(2,'0'),
+          String(Math.floor((obj.totalMs%60000)/1000)).padStart(2,'0')
+        ].join(':')
+      }))
+      .sort((a, b) => b.totalMs - a.totalMs);
+    res.json({ leaderboard });
+  } catch (err) {
+    console.error('Leaderboard error:', err);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

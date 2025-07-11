@@ -414,6 +414,7 @@
     <button id="addProjectBtn" title="Add Project"style="margin-top:auto; width:40px; height:40px; align-self:center; background:#00fff7; color:#181c20; border:none; border-radius:50%; font-size:28px; font-family:'Press Start 2P',monospace; cursor:pointer; box-shadow:0 2px 8px #00fff799; display:flex; align-items:center; justify-content:center;">
       +
     </button>
+    <button id="leaderboardBtn" style="margin-top:16px; width:100%; background:#222; color:#00fff7; border:2px solid #00fff7; border-radius:8px; font-size:12px; font-family:'Press Start 2P',monospace; cursor:pointer; box-shadow:0 2px 8px #00fff799;">🏆 Leaderboard</button>
   </div>
   <div class="centered-container">
     <div class="fairy-lights">
@@ -506,6 +507,59 @@
     let totalElapsedTime = 0;
     let selectedProject = null;
 
+    // Save timer state to localStorage
+function saveTimerState() {
+  localStorage.setItem('timerState', JSON.stringify({
+    isRunning, // for info, but always restore as paused
+    startTime,
+    elapsedTime,
+    selectedProject
+  }));
+}
+
+// Load timer state from localStorage and restore UI in paused state
+function loadTimerState() {
+  const state = JSON.parse(localStorage.getItem('timerState') || '{}');
+  if (state && state.selectedProject && (state.elapsedTime > 0)) {
+    isRunning = false; // always restore as paused
+    startTime = state.startTime || 0;
+    elapsedTime = state.elapsedTime || 0;
+    selectedProject = state.selectedProject;
+    document.getElementById('timerDisplay').innerText = formatTime(elapsedTime);
+    // Highlight the selected project in the sidebar (after projects load)
+    setTimeout(() => {
+      Array.from(projectList.children).forEach(li => {
+        if (li.textContent === selectedProject) {
+          li.classList.add('selected-project');
+          li.style.pointerEvents = '';
+          li.style.opacity = '';
+        } else {
+          li.classList.remove('selected-project');
+          li.style.pointerEvents = 'none';
+          li.style.opacity = '0.5';
+        }
+      });
+      fetchAndDisplayTotalTime(selectedProject);
+    }, 300);
+    // Show resume/cancel UI
+    document.getElementById('startPauseBtn').style.display = 'none';
+    document.getElementById('startPauseBtn2').style.display = 'block';
+    document.getElementById('startPauseBtn2').innerText = 'RESUME LOGGING';
+    document.getElementById('cancelBtn').style.display = 'block';
+    document.getElementById('logFields').style.display = 'block';
+    setWheelPaused(true);
+    // Ensure cancel button works after reload
+    document.getElementById('cancelBtn').onclick = cancelTimer;
+  }
+}
+
+function formatTime(ms) {
+  const hrs = Math.floor(ms / 3600000).toString().padStart(2, '0');
+  const mins = Math.floor((ms % 3600000) / 60000).toString().padStart(2, '0');
+  const secs = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+  return `${hrs}:${mins}:${secs}`;
+}
+
     function setWheelPaused(paused) {
       document.getElementById("giantWheel").style.display = paused ? "none" : "block";
       document.getElementById("giantWheelStatic").style.display = paused ? "block" : "none";
@@ -547,6 +601,7 @@
         logFields.style.display = "block";
         updateApiKeyStatus();
         setWheelPaused(false);
+        saveTimerState();
       } else {
         // Enable project selection
         projectList.style.pointerEvents = '';
@@ -556,6 +611,7 @@
         isRunning = false;
         startPauseBtn2.innerText = "RESUME LOGGING";
         setWheelPaused(true);
+        saveTimerState();
       }
     }
 
@@ -563,21 +619,83 @@
       const apiKey = localStorage.getItem('apiKey');
       const statusDiv = document.getElementById('apiKeyStatus');
       if (apiKey) {
-        statusDiv.innerHTML = `<span style="color: green;">✓ Active:</span> ${apiKey}`;
+        // Mask last 8 characters
+        let masked;
+        if (apiKey.length > 8) {
+          masked = '<span id="apiKeyMasked" class="copy-tooltip" style="cursor:pointer; position:relative;">' +
+            apiKey.slice(0, apiKey.length - 8) + '•'.repeat(8) +
+            '<span class="tooltip-text">Click to copy</span></span>';
+        } else {
+          masked = '<span id="apiKeyMasked" class="copy-tooltip" style="cursor:pointer; position:relative;">' +
+            '•'.repeat(apiKey.length) +
+            '<span class="tooltip-text">Click to copy</span></span>';
+        }
+        statusDiv.innerHTML = '<span style="color: green; font-size:12px; font-weight:bold; margin-right:8px;">✓ Active:</span> ' + masked;
+        // Click to copy logic
+        const maskedSpan = document.getElementById('apiKeyMasked');
+        maskedSpan.onclick = function() {
+          navigator.clipboard.writeText(apiKey).then(function() {
+            const tooltip = maskedSpan.querySelector('.tooltip-text');
+            tooltip.textContent = 'Copied!';
+            maskedSpan.style.background = '#00fff7';
+            maskedSpan.style.color = '#181c20';
+            setTimeout(function() {
+              tooltip.textContent = 'Click to copy';
+              maskedSpan.style.background = '';
+              maskedSpan.style.color = '';
+            }, 900);
+          });
+        };
       } else {
-        statusDiv.innerHTML = `<span style="color: red;">✗ No API Key Set</span>`;
+        statusDiv.innerHTML = '<span style="color: red;">✗ No API Key Set</span>';
       }
     }
+
+    // Update tooltip CSS so it only appears on hover
+(function() {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .copy-tooltip .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      width: 90px;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 4px 0;
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      top: -30px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-family: 'Press Start 2P', monospace;
+      pointer-events: none;
+      transition: opacity 0.1s;
+      box-shadow: 0 2px 8px #000a;
+    }
+    .copy-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+      transition-delay: 0s;
+    }
+  `;
+  // Remove any previous tooltip style to avoid duplicates
+  const prev = document.getElementById('apiKeyTooltipStyle');
+  if (prev) prev.remove();
+  style.id = 'apiKeyTooltipStyle';
+  document.head.appendChild(style);
+})();
 
     function updateTimer() {
       const currentTime = Date.now();
       elapsedTime = currentTime - startTime;
-
       const hrs = Math.floor(elapsedTime / 3600000).toString().padStart(2, '0');
       const mins = Math.floor((elapsedTime % 3600000) / 60000).toString().padStart(2, '0');
       const secs = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
-
       document.getElementById("timerDisplay").innerText = `${hrs}:${mins}:${secs}`;
+      saveTimerState(); // Save timer state on every tick
     }
 
     function cancelTimer() {
@@ -589,11 +707,8 @@
       isRunning = false;
       startTime = 0;
       elapsedTime = 0;
-
       // Enable project selection
-      projectList.style.pointerEvents = '';
-      projectList.style.opacity = '';
-
+      unlockAllProjects();
       document.getElementById("timerDisplay").innerText = "00:00:00";
       document.getElementById("startPauseBtn").style.display = "block";
       document.getElementById("startPauseBtn").innerText = "START LOGGING";
@@ -602,6 +717,7 @@
       document.getElementById("logFields").style.display = "none";
       setWheelPaused(true);
       audio.play();
+      saveTimerState();
     }
 
     function updateTotalTimeDisplay() {
@@ -680,8 +796,7 @@
           startTime = 0;
           elapsedTime = 0;
           // Enable project selection
-          projectList.style.pointerEvents = '';
-          projectList.style.opacity = '';
+          unlockAllProjects();
           document.getElementById("timerDisplay").innerText = "00:00:00";
           document.getElementById("startPauseBtn").style.display = "block";
           document.getElementById("startPauseBtn").innerText = "START LOGGING";
@@ -689,6 +804,7 @@
           document.getElementById("cancelBtn").style.display = "none";
           document.getElementById("logFields").style.display = "none";
           setWheelPaused(true);
+          saveTimerState(); // Reset state after log
         } else {
           alert(`❌ ERROR: ${result.error}`);
         }
@@ -850,6 +966,8 @@
                   fetchAndDisplayTotalTime(selectedProject);
                 }
               });
+              // Restore timer state after projects are loaded
+          loadTimerState();
             }
           } else {
             const li = document.createElement('li');
@@ -986,12 +1104,22 @@
         }
       };
     });
+
+    // Leaderboard button functionality: redirect to leaderboard.html
+    document.addEventListener('DOMContentLoaded', function() {
+      var leaderboardBtn = document.getElementById('leaderboardBtn');
+      if (leaderboardBtn) {
+        leaderboardBtn.onclick = function() {
+          window.location.href = 'leaderboard.html';
+        };
+      }
+    });
   </script>
 
 <div id="registerModal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:99999; align-items:center; justify-content:center;">
   <form id="registerForm" style="background:#fff; padding:32px; border-radius:12px; display:flex; flex-direction:column; align-items:center; min-width:320px;">
     <h3>Register to Get API Key</h3>
-    <input id="registerID" type="text" placeholder="Enter your Slack ID" required style="margin-bottom:18px; width:100%; padding:10px;">
+    <input id="registerID" type="text" placeholder="Enter your Slack Display ID" required style="margin-bottom:18px; width:100%; padding:10px;">
     <input id="registerEmail" type="email" placeholder="Enter your email" required style="margin-bottom:18px; width:100%; padding:10px;">
     <button type="submit" style="padding:10px 24px;">Register</button>
     <div id="registerMsg" style="margin-top:12px; color:green; display:none;"></div>
@@ -1010,5 +1138,6 @@
     <div id="apiKeyMsg" style="margin-top:12px; color:red; display:none;"></div>
   </form>
 </div>
+<div id="leaderboardModal" style="display:none;"></div>
 </body>
 </html>

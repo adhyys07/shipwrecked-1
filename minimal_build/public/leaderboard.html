@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: #181c20 url('./images/bg.png');
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      color: #00fff7;
+      font-size: 32px;
+      margin: 48px 0 32px 0;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    #leaderboardContent {
+      width: 90vw;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 18px;
+    }
+    th, td {
+      padding: 16px 8px;
+      text-align: center;
+    }
+    th {
+      color: #00fff7;
+      font-size: 20px;
+      padding: 18px 8px;
+    }
+    tr:nth-child(even) {
+      background: #23272b;
+    }
+    tr:nth-child(odd) {
+      background: #181c20;
+    }
+    .back-btn {
+      position: fixed;
+      top: 32px;
+      left: 32px;
+      margin: 0;
+      display: block;
+      background: #00fff7;
+      color: #181c20;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 32px;
+      font-size: 14px;
+      font-family: 'Press Start 2P', monospace;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #00fff799;
+    }
+    .back-btn:hover {
+      background: #ff4444;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
+  <h1>🏆 Leaderboard</h1>
+  <div id="leaderboardContent">Loading...</div>
+  <script>
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.leaderboard)) {
+          let html = `<table>`;
+          html += `<tr><th>Rank</th><th>Slack ID</th><th>Total Time</th></tr>`;
+          data.leaderboard.forEach((user, idx) => {
+            html += `<tr>`+
+              `<td style='color:#00fff7; font-weight:bold;'>${idx + 1}</td>`+
+              `<td style='color:#fff;'>${user.slack_id || '-'}</td>`+
+              `<td style='color:#fff;'>${user.totalTimeStr}</td>`+
+              `</tr>`;
+          });
+          html += `</table>`;
+          document.getElementById('leaderboardContent').innerHTML = html;
+        } else {
+          document.getElementById('leaderboardContent').innerHTML = 'No leaderboard data.';
+        }
+      } catch (err) {
+        document.getElementById('leaderboardContent').innerHTML = 'Failed to load leaderboard.';
+      }
+    }
+    loadLeaderboard();
+  </script>
+</body>
+</html>
